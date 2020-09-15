@@ -5,8 +5,9 @@
  */
 
 var app = require('../app');
-var debug = require('debug')('janken:server');
+var debug = require('debug')('websocket-study:server');
 var http = require('http');
+const socket = require('socket.io-client/lib/socket');
 
 /**
  * Get port from environment and store in Express.
@@ -90,13 +91,68 @@ function onListening() {
 }
 
 var io = require('socket.io')(server);
-var os = require('os');
+var janken_hand = [];
+var player = [];
+io.on('connection', (socket) => {
+  socket.on('goo', (data) => {
+    janken_hand.push(data);
+    player.push(socket.id);
+    game_start(socket);
+  });
 
-function emitServerStatus(socket) {
-  socket.emit('server-status', { loadavg: os.loadavg() });
-  console.log('server-status event emitted.');
+  socket.on('tyoki', (data) => {
+    janken_hand.push(data);
+    player.push(socket.id);
+    game_start(socket);
+  });
+
+  socket.on('par', (data) => {
+    janken_hand.push(data);
+    player.push(socket.id);
+    game_start(socket);
+  })
+  console.log(socket.id);
+
+  socket.on('reset', (data) => {
+    janken_hand.splice(0);
+    player.splice(0);
+    console.log("リセット");
+    socket.broadcast.emit('reset2', 0);
+  })
+});
+
+
+
+
+const game_start = (socket) => {
+  if(janken_hand[1]) {
+    console.log('スタート');
+    janken_game(socket);
+  }
 }
 
-io.on('connection', function (socket) {
-  setInterval(emitServerStatus, 10, socket);
-});
+const janken_game = (socket) => {
+  if(janken_hand[0] - janken_hand[1] == 0) {
+    socket.to(player[0]).emit('drow', 3);
+    socket.emit('drow', 3);
+    console.log("あいこ");
+  }else if(janken_hand[0] == 1 && janken_hand[1] == 2) {
+    socket.to(player[0]).emit('win', 0);
+    socket.emit('lose', 1);
+    console.log(player[0] + "の勝ち");
+  }else if(janken_hand[0] == 2 && janken_hand[1] == 3) {
+    socket.to(player[0]).emit('win', 0);
+    socket.emit('lose', 1);
+    console.log(player[0] + "の勝ち");
+  }else if(janken_hand[0] == 3 && janken_hand[1] == 1) {
+    socket.to(player[0]).emit('win', 0);
+    socket.emit('lose', 1);
+    console.log(player[0] + "の勝ち");
+  }else{
+    console.log(player[1] + "の勝ち");
+
+    socket.to(player[0]).emit('lose', 1);
+    socket.emit('win', 0);
+  }
+
+}

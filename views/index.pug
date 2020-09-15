@@ -1,17 +1,10 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
-  if user
-    p Hello, #{user.username}
-    a(href="/logout") Logout
-  else
-    a(href="/login") Login
-  div(id="block", class="block")
-  button(id="scaling-button") 拡大縮小
-  button(id="moving-button") 移動
-  h1 サーバーステータス
-  h3 ロードアベレージ
-  p(id="loadavg")
-  script(src="/javascripts/bundle.js")
+  form(id = "frmpost")
+    input(type="button" id = "goo2" value="グー" onclick="goo();btn_invalid()")
+    input(type="button" id = "tyoki2" value="チョキ" onclick="tyoki();btn_invalid()")
+    input(type="button" id = "par2" value="パー" onclick="par();btn_invalid()")
+    input(type="button" value="もう一回" onclick="rs()")
+  h2(id="winorlose")
+  ul(id="msglist")
