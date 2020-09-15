@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 const socket = io('http://localhost:8000');
 
 
-var goo = function nyan() {
+var goo = function goo() {
   socket.emit('goo', 1);
 }
 
